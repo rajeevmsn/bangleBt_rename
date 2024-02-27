@@ -1,0 +1,115 @@
+<!-- FILEPATH: /Users/rmylapal/Desktop/Projects/bangleBT_namechange/index.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bangle JS bt rename</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+
+    <h1 class="text-center">Bangle JS bluetooth rename</h1>
+    <h2 class="text-center"><u>Instructions</u></h2>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <p>1. Enter the new name for the watch in the input field below</p>
+                <p>2. Connect to the watch by clicking the "Connect watch" button</p>
+                <p>3. Select your watch from the list</p>
+                <p>4. Enter the new name in the input field below (maximum 15 characters, no spaces or special symbols)</p>
+                <p>5. Click the "Rename" button to change the name of the watch</p>
+                <p>6. Restart the watch and the new name will be displayed next time you connect</p>
+                <p> <u>Note:</u> Please use Google Chrome, Microsoft Edge or any other browser that supports web-bluetooth</p>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <input type="text" id="nameInput" class="form-control" placeholder="Enter new bluetooth name for watch">
+            </div>
+            <div class="col-md-6">
+                <button class="btn btn-primary" id="btConnect">Connect to watch</button>
+                <button onclick="submitForm()" class="btn btn-success">Rename</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://www.puck-js.com/puck.js"></script>
+    <script>
+
+        function connectToWatch() {
+            // Connect to the watch logic goes here
+        }
+
+        function submitForm() {
+            const btname = document.getElementById('nameInput').value;
+            const bangleName =`
+            g.clear();
+            NRF.setAdvertising({},{name: "${btname}"});
+            g.setBgColor(0,1,0);
+            g.setFont("Vector:20").setFontAlign(0,0);
+            g.drawString("New Name", 50,10);
+            g.drawString("${btname}", 50,30);
+
+            g.drawString("..............................", 30,35);
+            g.drawString("Please", 50,55);
+            g.drawString("Restart", 50,80);
+            g.drawString("Bangle", 50,105);
+            g.drawString("..............................", 30,120);
+            reset();
+            `;
+            connection.write(`\x03\x10if(1){${bangleName}}\n`);
+            console.log(btname);
+            setTimeout(function() {
+                location.reload();
+            }, 3000);
+        }
+            
+
+        // Dynamically change language based on browser language
+        var browserLanguage = navigator.language || navigator.userLanguage;
+        if (browserLanguage === 'en') {
+            document.documentElement.lang = 'en';
+        } else if (browserLanguage === 'fr') {
+            document.documentElement.lang = 'fr';
+        } else {
+            document.documentElement.lang = 'en'; // Default to English if language is not supported
+        }
+
+        // When we click the bangle connect button...
+        let response;
+        let connection;
+        document.getElementById('btConnect').addEventListener('click', function() {
+            console.log('bt connect');
+            // disconnect if connected already
+            if (connection) {
+                connection.close();
+                document.querySelector('#bt').classList.add('btdisconnected');
+                sendData('sessionEnd');
+                connection = null;
+            }
+            // Connect
+            Puck.connect(function(c) {
+                if (!c) {
+                    alert('Couldn\'t connect!');
+                    document.querySelector('#bt').classList.add('btdisconnected');
+                    return;
+                }
+                connection = c;
+                let buf = '';
+                connection.on('data', function(d) {
+                    buf += d;
+                    const l = buf.split('\n');
+                    buf = l.pop();
+                    //l.forEach(btOnline);
+                });
+                // First, reset the Bangle
+                connection.write('reset();\n', function() {});
+            });
+        });
+    </script>
+</body>
+</html>
