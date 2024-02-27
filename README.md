@@ -1,3 +1,4 @@
 # bangleBt_rename
-Renaming the BangleJS and BangleJS2 bluetooth
+Web app for renaming BangleJS and BangleJS2 bluetooth names
+
 Only works with browser that supports web bluetooth
